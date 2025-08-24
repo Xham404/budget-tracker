@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus, Trash2, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Lightbulb, Target, Download, FileText, Menu, X } from 'lucide-react';
 
@@ -7,6 +7,7 @@ export default function BudgetTracker() {
   const [salary2, setSalary2] = useState(2500);
   const [savings, setSavings] = useState(500);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [expenses, setExpenses] = useState([
     { id: 1, category: 'Électricité', amount: 120, type: 'fixe' },
     { id: 2, category: 'Téléphone', amount: 45, type: 'fixe' },
@@ -21,6 +22,11 @@ export default function BudgetTracker() {
     amount: '',
     type: 'fixe'
   });
+
+  // Détection côté client pour éviter les erreurs SSR
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const addExpense = () => {
     if (newExpense.category && newExpense.amount) {
@@ -548,7 +554,7 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                       labelLine={false}
                       label={({name, percent}) => {
                         // Masquer les labels sur mobile si trop petits
-                        return window.innerWidth > 640 ? `${name} (${(percent * 100).toFixed(1)}%)` : '';
+                        return isClient && window.innerWidth > 640 ? `${name} (${(percent * 100).toFixed(1)}%)` : '';
                       }}
                       outerRadius="70%"
                       fill="#8884d8"
@@ -591,9 +597,9 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                       angle={-45}
                       textAnchor="end"
                       height={60}
-                      fontSize={window.innerWidth > 640 ? 12 : 10}
+                      fontSize={isClient && window.innerWidth > 640 ? 12 : 10}
                     />
-                    <YAxis fontSize={window.innerWidth > 640 ? 12 : 10} />
+                    <YAxis fontSize={isClient && window.innerWidth > 640 ? 12 : 10} />
                     <Tooltip formatter={(value) => [`${value} €`, 'Montant']} />
                     <Bar dataKey="amount" fill="#3B82F6" />
                   </BarChart>
