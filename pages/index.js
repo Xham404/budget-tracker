@@ -233,7 +233,7 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
   const COLORS = ['#10B981', '#EF4444', '#F59E0B', '#3B82F6'];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-black">
       {/* Header responsive */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -248,27 +248,27 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
             <div className="hidden md:flex items-center space-x-2">
               <button
                 onClick={downloadJSON}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-black bg-white hover:bg-gray-50 transition-colors"
                 title="Télécharger en JSON"
               >
-                <Download className="h-4 w-4 mr-1" />
-                JSON
+                <Download className="h-4 w-4 mr-1 text-gray-700" />
+                <span className="text-black">JSON</span>
               </button>
               <button
                 onClick={downloadCSV}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-black bg-white hover:bg-gray-50 transition-colors"
                 title="Télécharger en CSV"
               >
-                <FileText className="h-4 w-4 mr-1" />
-                CSV
+                <FileText className="h-4 w-4 mr-1 text-gray-700" />
+                <span className="text-black">CSV</span>
               </button>
               <button
                 onClick={downloadPDF}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-black bg-white hover:bg-gray-50 transition-colors"
                 title="Télécharger le rapport"
               >
-                <FileText className="h-4 w-4 mr-1" />
-                Rapport
+                <FileText className="h-4 w-4 mr-1 text-gray-700" />
+                <span className="text-black">Rapport</span>
               </button>
             </div>
 
@@ -276,12 +276,12 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center justify-center p-2 rounded-md text-black hover:text-gray-900 hover:bg-gray-100 transition-colors"
               >
                 {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
+                  <X className="h-6 w-6 text-black" />
                 ) : (
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-6 w-6 text-black" />
                 )}
               </button>
             </div>
@@ -296,30 +296,30 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                     downloadJSON();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-black hover:bg-gray-100 rounded-md transition-colors"
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Télécharger JSON
+                  <Download className="h-4 w-4 mr-2 text-gray-700" />
+                  <span className="text-black">Télécharger JSON</span>
                 </button>
                 <button
                   onClick={() => {
                     downloadCSV();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-black hover:bg-gray-100 rounded-md transition-colors"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Télécharger CSV
+                  <FileText className="h-4 w-4 mr-2 text-gray-700" />
+                  <span className="text-black">Télécharger CSV</span>
                 </button>
                 <button
                   onClick={() => {
                     downloadPDF();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-black hover:bg-gray-100 rounded-md transition-colors"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Télécharger Rapport
+                  <FileText className="h-4 w-4 mr-2 text-gray-700" />
+                  <span className="text-black">Télécharger Rapport</span>
                 </button>
               </div>
             </div>
@@ -329,7 +329,7 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="mb-6 sm:mb-8">
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-gray-800">
             Suivez vos revenus, dépenses et épargne mensuels avec des conseils intelligents
           </p>
         </div>
