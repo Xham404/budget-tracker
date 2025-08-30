@@ -9,18 +9,23 @@ export default function BudgetTracker() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [expenses, setExpenses] = useState([
-    { id: 1, category: 'Électricité', amount: 120, type: 'fixe' },
-    { id: 2, category: 'Téléphone', amount: 45, type: 'fixe' },
-    { id: 3, category: 'Eau', amount: 60, type: 'fixe' },
-    { id: 4, category: 'Internet', amount: 35, type: 'fixe' },
-    { id: 5, category: 'Courses', amount: 400, type: 'variable' },
-    { id: 6, category: 'Transport', amount: 80, type: 'variable' }
+    { id: 1, category: 'Internet', amount: 23.99, type: 'fixe', person: 'commun' },
+    { id: 2, category: 'Loyer', amount: 1235.23, type: 'fixe', person: 'commun' },
+    { id: 3, category: 'Électricité', amount: 45, type: 'variable', person: 'commun' },
+    { id: 4, category: 'Frais eau', amount: 30, type: 'fixe', person: 'commun' },
+    { id: 5, category: 'Essence', amount: 85, type: 'variable', person: 'commun' },
+    { id: 6, category: 'Courses', amount: 250, type: 'variable', person: 'commun' },
+    { id: 7, category: 'Restaurant', amount: 120, type: 'variable', person: 'commun' },
+    { id: 8, category: 'Spotify', amount: 17.20, type: 'fixe', person: 'personne1' },
+    { id: 9, category: 'Carte bourso', amount: 9.90, type: 'fixe', person: 'personne1' },
+    { id: 10, category: 'Cantine + centre', amount: 300, type: 'variable', person: 'personne2' }
   ]);
 
   const [newExpense, setNewExpense] = useState({
     category: '',
     amount: '',
-    type: 'fixe'
+    type: 'fixe',
+    person: 'commun'
   });
 
   // Détection côté client pour éviter les erreurs SSR
@@ -34,9 +39,10 @@ export default function BudgetTracker() {
         id: Date.now(),
         category: newExpense.category,
         amount: parseFloat(newExpense.amount),
-        type: newExpense.type
+        type: newExpense.type,
+        person: newExpense.person
       }]);
-      setNewExpense({ category: '', amount: '', type: 'fixe' });
+      setNewExpense({ category: '', amount: '', type: 'fixe', person: 'commun' });
     }
   };
 
@@ -57,6 +63,16 @@ export default function BudgetTracker() {
     const fixedExpenses = expenses.filter(e => e.type === 'fixe').reduce((sum, e) => sum + e.amount, 0);
     const variableExpenses = expenses.filter(e => e.type === 'variable').reduce((sum, e) => sum + e.amount, 0);
     
+    // Calculs des dépenses personnelles
+    const commonExpenses = expenses.filter(e => e.person === 'commun').reduce((sum, e) => sum + e.amount, 0);
+    const person1Expenses = expenses.filter(e => e.person === 'personne1').reduce((sum, e) => sum + e.amount, 0);
+    const person2Expenses = expenses.filter(e => e.person === 'personne2').reduce((sum, e) => sum + e.amount, 0);
+    
+    // Répartition des dépenses communes (50/50)
+    const commonPerPerson = commonExpenses / 2;
+    const person1Total = person1Expenses + commonPerPerson;
+    const person2Total = person2Expenses + commonPerPerson;
+    
     const expenseRatio = (totalExpenses / totalSalary) * 100;
     const variableRatio = (variableExpenses / totalSalary) * 100;
     
@@ -74,9 +90,15 @@ export default function BudgetTracker() {
       } else if (expense.category.toLowerCase().includes('courses') && expense.amount > totalSalary * 0.15) {
         status = 'warning';
         suggestion = 'Budget courses élevé. Planifiez vos repas et comparez les prix.';
-      } else if (expense.category.toLowerCase().includes('transport') && expense.amount > totalSalary * 0.1) {
+      } else if (expense.category.toLowerCase().includes('restaurant') && expense.amount > totalSalary * 0.08) {
         status = 'warning';
-        suggestion = 'Coûts de transport importants. Étudiez les abonnements ou le covoiturage.';
+        suggestion = 'Budget restaurant important. Cuisinez plus souvent à la maison.';
+      } else if (expense.category.toLowerCase().includes('essence') && expense.amount > totalSalary * 0.08) {
+        status = 'warning';
+        suggestion = 'Coûts essence élevés. Étudiez les transports en commun ou le covoiturage.';
+      } else if (expense.category.toLowerCase().includes('spotify') && expense.amount > 15) {
+        status = 'warning';
+        suggestion = 'Abonnements multiples ? Vérifiez vos souscriptions streaming.';
       } else if (ratioToIncome > 8 && expense.type === 'variable') {
         status = 'alert';
         suggestion = 'Cette dépense représente plus de 8% de vos revenus. Pourrait-elle être réduite ?';
@@ -94,7 +116,14 @@ export default function BudgetTracker() {
       savingsRate: ((savings / totalSalary) * 100).toFixed(1),
       expenseRatio: expenseRatio.toFixed(1),
       variableRatio: variableRatio.toFixed(1),
-      expenseAnalysis
+      expenseAnalysis,
+      // Dépenses personnelles
+      commonExpenses,
+      person1Expenses,
+      person2Expenses,
+      person1Total,
+      person2Total,
+      commonPerPerson
     };
   }, [expenses, salary1, salary2, savings]);
 
@@ -406,29 +435,38 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                   placeholder="Catégorie"
                   value={newExpense.category}
                   onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
-                  className="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
                 <input
                   type="number"
                   placeholder="Montant"
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
-                  className="w-full sm:w-24 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-24 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
                 <select
                   value={newExpense.type}
                   onChange={(e) => setNewExpense({...newExpense, type: e.target.value})}
-                  className="w-full sm:w-auto p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-auto p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 >
                   <option value="fixe">Fixe</option>
                   <option value="variable">Variable</option>
+                </select>
+                <select
+                  value={newExpense.person}
+                  onChange={(e) => setNewExpense({...newExpense, person: e.target.value})}
+                  className="w-full sm:w-auto p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                >
+                  <option value="commun">Commun</option>
+                  <option value="personne1">Personne 1</option>
+                  <option value="personne2">Personne 2</option>
                 </select>
                 <button
                   onClick={addExpense}
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center transition-colors"
                 >
                   <Plus className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Ajouter</span>
+                  <span className="hidden sm:inline text-white">Ajouter</span>
                 </button>
               </div>
             </div>
@@ -439,10 +477,11 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                 <table className="w-full min-w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base">Catégorie</th>
-                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base">Montant</th>
-                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base hidden sm:table-cell">Type</th>
-                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base">Actions</th>
+                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base text-black">Catégorie</th>
+                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base text-black">Montant</th>
+                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base hidden sm:table-cell text-black">Type</th>
+                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base hidden lg:table-cell text-black">Personne</th>
+                      <th className="text-left py-3 px-2 font-semibold text-sm sm:text-base text-black">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -466,14 +505,23 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                                   <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" title={analysis.suggestion} />
                                 )}
                               </div>
-                              <div className="sm:hidden mt-1">
+                              <div className="sm:hidden mt-1 flex gap-1">
                                 <select
                                   value={expense.type}
                                   onChange={(e) => updateExpense(expense.id, 'type', e.target.value)}
-                                  className="text-xs p-1 border border-gray-200 rounded bg-gray-50"
+                                  className="text-xs p-1 border border-gray-200 rounded bg-gray-50 text-black flex-1"
                                 >
                                   <option value="fixe">Fixe</option>
                                   <option value="variable">Variable</option>
+                                </select>
+                                <select
+                                  value={expense.person}
+                                  onChange={(e) => updateExpense(expense.id, 'person', e.target.value)}
+                                  className="text-xs p-1 border border-gray-200 rounded bg-gray-50 text-black flex-1"
+                                >
+                                  <option value="commun">Commun</option>
+                                  <option value="personne1">P1</option>
+                                  <option value="personne2">P2</option>
                                 </select>
                               </div>
                             </div>
@@ -483,9 +531,9 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                               type="number"
                               value={expense.amount}
                               onChange={(e) => updateExpense(expense.id, 'amount', e.target.value)}
-                              className="w-full p-1 border-none bg-transparent focus:bg-white focus:border focus:border-gray-300 rounded transition-all text-sm sm:text-base"
+                              className="w-full p-1 border-none bg-transparent focus:bg-white focus:border focus:border-gray-300 rounded transition-all text-sm sm:text-base text-black"
                             />
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-600">
                               {analysis?.ratioToIncome.toFixed(1)}%
                             </div>
                           </td>
@@ -493,10 +541,21 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
                             <select
                               value={expense.type}
                               onChange={(e) => updateExpense(expense.id, 'type', e.target.value)}
-                              className="w-full p-1 border-none bg-transparent focus:bg-white focus:border focus:border-gray-300 rounded transition-all text-sm"
+                              className="w-full p-1 border-none bg-transparent focus:bg-white focus:border focus:border-gray-300 rounded transition-all text-sm text-black"
                             >
                               <option value="fixe">Fixe</option>
                               <option value="variable">Variable</option>
+                            </select>
+                          </td>
+                          <td className="py-3 px-2 hidden lg:table-cell">
+                            <select
+                              value={expense.person}
+                              onChange={(e) => updateExpense(expense.id, 'person', e.target.value)}
+                              className="w-full p-1 border-none bg-transparent focus:bg-white focus:border focus:border-gray-300 rounded transition-all text-sm text-black"
+                            >
+                              <option value="commun">Commun</option>
+                              <option value="personne1">Personne 1</option>
+                              <option value="personne2">Personne 2</option>
                             </select>
                           </td>
                           <td className="py-3 px-2">
@@ -517,16 +576,43 @@ ${parseFloat(calculations.variableRatio) > 25 ? `- Maîtrisez vos dépenses vari
 
               {/* Résumé responsive */}
               <div className="mt-6 pt-4 border-t border-gray-200">
+                {/* Dépenses personnelles */}
+                <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-3 text-sm sm:text-base">👥 Répartition par Personne</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-gray-800">Dépenses Communes</div>
+                      <div className="text-lg font-bold text-blue-600">{calculations.commonExpenses.toFixed(2)} €</div>
+                      <div className="text-xs text-gray-600">Partagées 50/50</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-gray-800">Total Personne 1</div>
+                      <div className="text-lg font-bold text-green-600">{calculations.person1Total.toFixed(2)} €</div>
+                      <div className="text-xs text-gray-600">
+                        Perso: {calculations.person1Expenses.toFixed(2)}€ + Commun: {calculations.commonPerPerson.toFixed(2)}€
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-gray-800">Total Personne 2</div>
+                      <div className="text-lg font-bold text-orange-600">{calculations.person2Total.toFixed(2)} €</div>
+                      <div className="text-xs text-gray-600">
+                        Perso: {calculations.person2Expenses.toFixed(2)}€ + Commun: {calculations.commonPerPerson.toFixed(2)}€
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Résumé global */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-black">
                     <span>Dépenses fixes:</span>
                     <span className="font-semibold">{calculations.fixedExpenses.toFixed(2)} €</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-black">
                     <span>Dépenses variables:</span>
                     <span className="font-semibold">{calculations.variableExpenses.toFixed(2)} €</span>
                   </div>
-                  <div className="flex justify-between font-semibold text-base border-t pt-2 sm:col-span-1">
+                  <div className="flex justify-between font-semibold text-base border-t pt-2 sm:col-span-1 text-black">
                     <span>Total dépenses:</span>
                     <span>{calculations.totalExpenses.toFixed(2)} €</span>
                   </div>
